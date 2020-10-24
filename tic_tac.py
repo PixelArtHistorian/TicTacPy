@@ -3,12 +3,16 @@ def print_board(matrix):
     for i in range(0, len(matrix)):
         for j in range (0, len(matrix[i])):
             if j < len(matrix[i]) - 1:
-                board += str(matrix[i][j]) +"|"
+                text = " {element} |"
+                board += text.format(element = str(matrix[i][j]))
             else:
-                board += str(matrix[i][j]) + "\n"
+                text = " {element} \n"
+                board += text.format(element = str(matrix[i][j]))
         if i < len(matrix) - 1:
-            board += ("-+-+-\n")
+            board += ("---+---+---\n")
     print(board)
+
+
 
 test_matrix = []
 row = []
