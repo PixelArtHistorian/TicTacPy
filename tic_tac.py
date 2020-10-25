@@ -1,4 +1,10 @@
-"""A tic tac toe game written in python"""
+"""
+A tic tac toe game written in python
+"""
+import random
+import platform
+import os
+
 PLAYER = -1
 CPU = 1
 board = [
@@ -10,7 +16,9 @@ board = [
 #Functions
 
 def print_board(matrix):
-    """ Prints the current state of the board"""
+    """ 
+    Prints the current state of the board
+    """
     game_board = ""
     for i, row in enumerate(matrix):
         if i == 0:
@@ -28,7 +36,9 @@ def print_board(matrix):
     print(game_board)
 
 def get_placeholder(cell):
-    """Returns appropriate placeholder based on the cell value"""
+    """
+    Returns appropriate placeholder based on the cell value
+    """
     if cell == -1:
         placeholder = "X"
     elif  cell == 1:
@@ -37,8 +47,20 @@ def get_placeholder(cell):
         placeholder = " "
     return placeholder
 
+def clean():
+    """
+    Cleans the console
+    """
+    os_name = platform.system().lower()
+    if "windows" in os_name:
+        os.system('cls')
+    else:
+        os.system('clear')
+
 def get_winner(matrix):
-    """ Checks the state of the board to see i a player has won"""
+    """ 
+    Checks the state of the board to see i a player has won
+    """
     #check first diagonal
     diagonal1 = []
     for i, row in enumerate(matrix):
@@ -69,7 +91,9 @@ def get_winner(matrix):
     return 0
 
 def get_move():
-    """Gets human player input"""
+    """
+    Gets human player input
+    """
     print("Insert column letter")
     column = input()
     while not validate_columns(column):
@@ -89,7 +113,9 @@ def get_move():
     return (int(row_index), column_index)
 
 def validate_columns(column_id):
-    """Validates columns input"""
+    """
+    Validates columns input
+    """
     validated = False
     if not isinstance(column_id,str):
         validated = False
@@ -100,7 +126,9 @@ def validate_columns(column_id):
     return validated
 
 def validate_rows(row_id):
-    """Validate rows input"""
+    """
+    Validate rows input
+    """
     validated = False
     if not row_id.isdigit():
         validated = False
@@ -111,12 +139,31 @@ def validate_rows(row_id):
     return validated
 
 def set_board_cell(x_move, y_move, player):
-    """Sets the selected cell for the player or the cpu"""
+    """
+    Sets the selected cell for the player or the cpu
+    """
     board[x_move][y_move] = player
+
+def get_free_cells(matrix):
+    """
+    Gets free cells list
+    """
+    free_cells = []
+    for i, row in enumerate(matrix):
+        for j, cell in enumerate(row):
+            if cell == 0:
+                free_cells.append((i,j))
+    return free_cells
 
 while get_winner(board) != -1:
     #player turn
+    print("Player turn (X)")
     print_board(board)
-    move = get_move()
-    set_board_cell(move[0],move[1], PLAYER)
+    move_player = get_move()
+    set_board_cell(move_player[0], move_player[1], PLAYER)
     #cpu turn
+    print("CPU turn (O)")
+    print_board(board)
+    move_CPU = random.choice(get_free_cells(board))
+    set_board_cell(move_CPU[0], move_CPU[1], CPU)
+    clean()
