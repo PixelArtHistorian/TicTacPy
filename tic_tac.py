@@ -3,7 +3,6 @@ A tic tac toe game written in python
 """
 import random
 import platform
-import time
 import math
 import os
 
@@ -13,11 +12,7 @@ INFINITY = math.inf
 PLAYERTOKEN = ""
 CPUTOKEN = ""
 EXIT = False
-board = [
-    [0,0,0],
-    [0,0,0],
-    [0,0,0],
-]
+board = [[ 0 for x in range(3)] for y in range(3)]
 
 #Functions
 
@@ -53,6 +48,9 @@ def get_placeholder(cell, p_token, cpu_token):
         placeholder = " "
     return placeholder
 
+def reset_board():
+    return [[0 for x in range(3)] for y in range(3)]
+
 def clean():
     """
     Cleans the console
@@ -65,7 +63,7 @@ def clean():
 
 def get_winner(matrix):
     """
-    Checks the state of the board to see i a player has won
+    Checks the state of the board to get the winning player
     """
     #check first diagonal
     diagonal1 = []
@@ -73,27 +71,28 @@ def get_winner(matrix):
         for j, cell in enumerate(row):
             if i == j:
                 diagonal1.append(cell)
-    if len(set(diagonal1)) == 1:
+    if len(set(diagonal1)) == 1 and diagonal1[0] != 0:
         return diagonal1[0]
     #check second diagonal
     diagonal2 = []
-    for i in reversed(range(0, len(matrix))):
-        for j in reversed(range(0, len(matrix[i]))):
-            if i == j:
+    for i, row in enumerate(matrix):
+        for j, cell in enumerate(row):
+            if i == (len(matrix)-1) - j:
                 diagonal2.append(matrix[i][j])
-    if len(set(diagonal1)) == 1:
-        return diagonal1[0]
+    if len(set(diagonal2)) == 1 and diagonal2[0] != 0:
+        return diagonal2[0]
     #check rows
     for i, row in enumerate(matrix):
-        if len(set(row)) == 1:
+        if len(set(row)) == 1 and row[0] != 0:
             return row[0]
     #check columns
     column = []
-    for i, row in enumerate(matrix):
-        for j, cell in enumerate(row):
-            column.append(cell)
-        if len(set(column)) == 1:
-            return cell
+    for j in range(0, len(matrix)):
+        for i, row in enumerate(matrix):
+            column.append(matrix[i][j])
+        if len(set(column)) == 1 and column[0]!= 0:
+            return column[0]
+        column.clear()
     return 0
 
 def minimax(board_state, depth, player):
@@ -108,7 +107,6 @@ def minimax(board_state, depth, player):
     if depth == 0 or get_winner(board) != 0:
         score = get_winner(board_state)
         return[-1,-1, score]
-
     for cell in get_free_cells(board_state):
         x_index ,y_index  = cell[0], cell[1]
         board_state = change_board_state(x_index, y_index, player, board_state)
@@ -124,26 +122,31 @@ def minimax(board_state, depth, player):
                 best = score
     return best
 
-def get_move():
+def get_move(board_state):
     """
     Gets human player input
     """
-    print("Insert column letter")
-    column = input().strip()
-    while not validate_columns(column):
-        print("Invalid input, insert column letter")
+    validated = False
+    while not validated:
+        print("Insert column letter")
         column = input().strip()
-    if column == "a":
-        column_index = 0
-    elif column == "b":
-        column_index = 1
-    elif column == "c":
-        column_index = 2
-    print("Insert row number")
-    row_index = input().strip()
-    while not validate_rows(row_index):
-        print("Invalid input, insert row number")
+        while not validate_columns(column):
+            print("Invalid input, insert column letter")
+            column = input().strip()
+        if column == "a":
+            column_index = 0
+        elif column == "b":
+            column_index = 1
+        elif column == "c":
+            column_index = 2
+        print("Insert row number")
         row_index = input().strip()
+        while not validate_rows(row_index):
+            print("Invalid input, insert row number")
+            row_index = input().strip()
+        validated = validate_move((int(row_index), column_index), board_state)
+        if not validated:
+            print("Invalid move, the cell is already occupied")
     return (int(row_index), column_index)
 
 def cpu_move(board_state):
@@ -185,6 +188,12 @@ def validate_rows(row_id):
         validated= False
     return validated
 
+def validate_move(move, board_state):
+    """
+    Validates player move
+    """
+    return move in get_free_cells(board_state)
+
 def validate_token_choice(choice):
     """
     Validates player token choice
@@ -195,7 +204,7 @@ def validate_exit(choice):
     """
     Validates player choice to exit or continue playing
     """
-    return choice.isalpha() and (choice.upper() == "Play" or choice.upper() == "Exit")
+    return choice.isalpha() and (choice.upper() == "PLAY" or choice.upper() == "EXIT")
 
 def change_board_state(x_move, y_move, player, board_state):
     """
@@ -216,13 +225,16 @@ def get_free_cells(matrix):
     return free_cells
 
 #Main loop
-print("Type X or O to chose your tokens, X always goes first")
-player_choice = input().strip()
+
 while not EXIT:
+
+    print("Type X or O to chose your tokens, X always goes first")
+    player_choice = input().strip()
 
     while not validate_token_choice(player_choice):
         print("Invalid token, please select X or O")
         player_choice = input().strip()
+
     if player_choice.upper() == "X":
         PLAYERTOKEN = "X"
         CPUTOKEN = "O"
@@ -230,44 +242,50 @@ while not EXIT:
         PLAYERTOKEN = "O"
         CPUTOKEN = "X"
 
+    clean()
+
     while len(get_free_cells(board)) !=0 and get_winner(board) == 0:
         if PLAYERTOKEN.upper() == "X":
+            clean()
             #Player Turn
             print("Player turn (X)")
             print_board(board, PLAYERTOKEN, CPUTOKEN)
-            move_player = get_move()
+            move_player = get_move(board)
             board = change_board_state(move_player[0], move_player[1], PLAYER, board)
-            clean()
-            #cpu turn
-            print("CPU turn (O)")
-            move_CPU = cpu_move(board)
-            board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
-            time.sleep(2)
-            clean()
-        else:
-            #cpu turn
-            print("CPU turn (X)")
-            move_CPU = cpu_move(board)
-            board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
-            time.sleep(2)
-            clean()
-            #Player Turn
-            print("Player turn (O)")
-            print_board(board, PLAYERTOKEN, CPUTOKEN)
-            move_player = get_move()
-            board = change_board_state(move_player[0], move_player[1], PLAYER, board)
-            clean()
+            if get_winner(board) == 0:
+                clean()
+                #cpu turn correggere
+                move_CPU = cpu_move(board)
+                board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
+                print_board(board, PLAYERTOKEN, CPUTOKEN)
 
+        else:
+            clean()
+            #cpu turn
+            move_CPU = cpu_move(board)
+            board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
+            print_board(board, PLAYERTOKEN, CPUTOKEN)
+            if get_winner(board) == 0:
+                clean()
+                #Player Turn
+                print("Player turn (O)")
+                print_board(board, PLAYERTOKEN, CPUTOKEN)
+                move_player = get_move(board)
+                board = change_board_state(move_player[0], move_player[1], PLAYER, board)
     if get_winner(board) == 1:
         print("CPU wins")
-    elif get_winner(board) == 1:
+    elif get_winner(board) == -1:
         print("You win")
     else:
         print("It's a draw")
-    time.sleep(1)
+
+    board = reset_board()
+
     print("Type 'Play' to play again or 'Quit' to exit")
     exit_choice = input().strip()
     while not validate_exit(exit_choice):
         print("Type 'Play' to play again or 'Quit' to exit")
+        exit_choice = input().strip()
     EXIT = exit_choice.upper() == "QUIT"
 
+    
