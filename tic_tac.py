@@ -3,6 +3,7 @@ A tic tac toe game written in python
 """
 import random
 import platform
+import time
 import math
 import os
 
@@ -184,11 +185,17 @@ def validate_rows(row_id):
         validated= False
     return validated
 
-def validate_choice(choice):
+def validate_token_choice(choice):
     """
     Validates player token choice
     """
     return choice.isalpha() and (choice.upper() == "X" or choice.upper() == "O")
+
+def validate_exit(choice):
+    """
+    Validates player choice to exit or continue playing
+    """
+    return choice.isalpha() and (choice.upper() == "Play" or choice.upper() == "Exit")
 
 def change_board_state(x_move, y_move, player, board_state):
     """
@@ -212,8 +219,8 @@ def get_free_cells(matrix):
 print("Type X or O to chose your tokens, X always goes first")
 player_choice = input().strip()
 while not EXIT:
-    
-    while validate_choice(player_choice):
+
+    while not validate_token_choice(player_choice):
         print("Invalid token, please select X or O")
         player_choice = input().strip()
     if player_choice.upper() == "X":
@@ -224,19 +231,43 @@ while not EXIT:
         CPUTOKEN = "X"
 
     while len(get_free_cells(board)) !=0 and get_winner(board) == 0:
-        #player turn
-        print("Player turn (X)")
-        print_board(board, PLAYERTOKEN, CPUTOKEN)
-        move_player = get_move()
-        board = change_board_state(move_player[0], move_player[1], PLAYER, board)
-        #cpu turn
-        move_CPU = cpu_move(board)
-        board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
-        clean()
+        if PLAYERTOKEN.upper() == "X":
+            #Player Turn
+            print("Player turn (X)")
+            print_board(board, PLAYERTOKEN, CPUTOKEN)
+            move_player = get_move()
+            board = change_board_state(move_player[0], move_player[1], PLAYER, board)
+            clean()
+            #cpu turn
+            print("CPU turn (O)")
+            move_CPU = cpu_move(board)
+            board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
+            time.sleep(2)
+            clean()
+        else:
+            #cpu turn
+            print("CPU turn (X)")
+            move_CPU = cpu_move(board)
+            board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
+            time.sleep(2)
+            clean()
+            #Player Turn
+            print("Player turn (O)")
+            print_board(board, PLAYERTOKEN, CPUTOKEN)
+            move_player = get_move()
+            board = change_board_state(move_player[0], move_player[1], PLAYER, board)
+            clean()
 
     if get_winner(board) == 1:
         print("CPU wins")
     elif get_winner(board) == 1:
         print("You win")
     else:
-        print("It's a draw")    
+        print("It's a draw")
+    time.sleep(1)
+    print("Type 'Play' to play again or 'Quit' to exit")
+    exit_choice = input().strip()
+    while not validate_exit(exit_choice):
+        print("Type 'Play' to play again or 'Quit' to exit")
+    EXIT = exit_choice.upper() == "QUIT"
+
