@@ -12,7 +12,6 @@ INFINITY = math.inf
 PLAYERTOKEN = ""
 CPUTOKEN = ""
 EXIT = False
-board = [[ 0 for x in range(3)] for y in range(3)]
 
 #Functions
 
@@ -49,6 +48,9 @@ def get_placeholder(cell, p_token, cpu_token):
     return placeholder
 
 def reset_board():
+    """
+    Creates a new board
+    """
     return [[0 for x in range(3)] for y in range(3)]
 
 def clean():
@@ -228,6 +230,7 @@ def get_free_cells(matrix):
 
 while not EXIT:
 
+    clean()
     print("Type X or O to chose your tokens, X always goes first")
     player_choice = input().strip()
 
@@ -243,7 +246,7 @@ while not EXIT:
         CPUTOKEN = "X"
 
     clean()
-
+    board = reset_board()
     while len(get_free_cells(board)) !=0 and get_winner(board) == 0:
         if PLAYERTOKEN.upper() == "X":
             clean()
@@ -252,7 +255,7 @@ while not EXIT:
             print_board(board, PLAYERTOKEN, CPUTOKEN)
             move_player = get_move(board)
             board = change_board_state(move_player[0], move_player[1], PLAYER, board)
-            if get_winner(board) == 0:
+            if len(get_free_cells(board)) !=0 and get_winner(board) == 0:
                 clean()
                 #cpu turn correggere
                 move_CPU = cpu_move(board)
@@ -265,13 +268,14 @@ while not EXIT:
             move_CPU = cpu_move(board)
             board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
             print_board(board, PLAYERTOKEN, CPUTOKEN)
-            if get_winner(board) == 0:
+            if len(get_free_cells(board)) !=0 and get_winner(board) == 0:
                 clean()
                 #Player Turn
                 print("Player turn (O)")
                 print_board(board, PLAYERTOKEN, CPUTOKEN)
                 move_player = get_move(board)
                 board = change_board_state(move_player[0], move_player[1], PLAYER, board)
+
     if get_winner(board) == 1:
         print("CPU wins")
     elif get_winner(board) == -1:
@@ -287,5 +291,3 @@ while not EXIT:
         print("Type 'Play' to play again or 'Quit' to exit")
         exit_choice = input().strip()
     EXIT = exit_choice.upper() == "QUIT"
-
-    
