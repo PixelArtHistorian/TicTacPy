@@ -124,6 +124,37 @@ def minimax(board_state, depth, player):
                 best = score
     return best
 
+def cpu_move(board_state):
+    """
+    Functions that uses the minimax function to find the optimal move for the cpu
+    """
+    depth = len(get_free_cells(board_state))
+    if depth == 0 or get_winner(board) != 0:
+        return
+    if depth == 9:
+        return random.choice(get_free_cells(board))
+    else:
+        move = minimax(board_state, depth, CPU)
+        return move
+
+def change_board_state(x_move, y_move, player, board_state):
+    """
+    Sets the selected cell for the player or the cpu
+    """
+    board_state[x_move][y_move] = player
+    return board_state
+
+def get_free_cells(matrix):
+    """
+    Gets free cells list
+    """
+    free_cells = []
+    for i, row in enumerate(matrix):
+        for j, cell in enumerate(row):
+            if cell == 0:
+                free_cells.append((i,j))
+    return free_cells
+
 def get_move(board_state):
     """
     Gets human player input
@@ -150,19 +181,6 @@ def get_move(board_state):
         if not validated:
             print("Invalid move, the cell is already occupied")
     return (int(row_index), column_index)
-
-def cpu_move(board_state):
-    """
-    Functions that uses the minimax function to find the optimal move for the cpu
-    """
-    depth = len(get_free_cells(board_state))
-    if depth == 0 or get_winner(board) != 0:
-        return
-    if depth == 9:
-        return random.choice(get_free_cells(board))
-    else:
-        move = minimax(board_state, depth, CPU)
-        return move
 
 def validate_columns(column_id):
     """
@@ -207,24 +225,6 @@ def validate_exit(choice):
     Validates player choice to exit or continue playing
     """
     return choice.isalpha() and (choice.upper() == "PLAY" or choice.upper() == "EXIT")
-
-def change_board_state(x_move, y_move, player, board_state):
-    """
-    Sets the selected cell for the player or the cpu
-    """
-    board_state[x_move][y_move] = player
-    return board_state
-
-def get_free_cells(matrix):
-    """
-    Gets free cells list
-    """
-    free_cells = []
-    for i, row in enumerate(matrix):
-        for j, cell in enumerate(row):
-            if cell == 0:
-                free_cells.append((i,j))
-    return free_cells
 
 #Main loop
 
