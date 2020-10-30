@@ -257,7 +257,7 @@ while not EXIT:
             board = change_board_state(move_player[0], move_player[1], PLAYER, board)
             if len(get_free_cells(board)) !=0 and get_winner(board) == 0:
                 clean()
-                #cpu turn correggere
+                #cpu turn
                 move_CPU = cpu_move(board)
                 board = change_board_state(move_CPU[0], move_CPU[1], CPU, board)
                 print_board(board, PLAYERTOKEN, CPUTOKEN)
